@@ -84,4 +84,41 @@ f, _ := OpenFile("foo.dat")
 ReadFile(f, 0, data)
 CloseFile(f)
 ```
+在方法表达式中，因为得到的 ReadFile 和 CloseFile 函数参数中含有 File 这个特有的类型参数，这使得 File 相关的方法无法**和其它不是 File 类型但是有着相同 Read 和 Close 方法的对象无缝适配**。此时，可以通过结合闭包特性（类似lambda表达式）来消除方法表达式中第一个参数类型的差异（*先通过打开对象获得对象类型，再将方法绑定到对象,从而可以处理不同类型的对象（打开不同类型的对象）*）：
+```
+// 先打开文件对象
+f, _ := OpenFile("foo.dat")
+
+// 绑定到了 f 对象
+// func Close() error
+var Close = func() error {
+	return (*File).Close(f)
+}
+
+// 绑定到了 f 对象
+// func Read(offset int64, data []byte) int
+var Read = func(offset int64, data []byte) int {
+	return (*File).Read(f, offset, data)
+}
+
+// 文件处理
+Read(0, data)
+Close()
+```
+也可以用方法值特性可以简化实现（直接通过打开对象，再将方法绑定到对象）：
+```
+// 先打开文件对象，
+f, _ := OpenFile("foo.dat")
+
+// 方法值: 绑定到了 f 对象
+// func Close() error
+var Close = f.Close
+
+// 方法值: 绑定到了 f 对象
+// func Read(offset int64, data []byte) int
+var Read = f.Read
+
+// 文件处理
+Read(0, data)
+Close()
 ```
