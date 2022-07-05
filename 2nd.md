@@ -147,4 +147,46 @@ fmt.Println(cp.Y)       // "2"
 ```
 **在传统的面向对象语言（eg.C++ 或 Java）的继承中，子类的方法是在运行时动态绑定到对象的，因此基类实现的某些方法看到的 this 可能不是基类类型对应的对象，这个特性会导致基类方法运行的不确定性。而在 Go 语言通过嵌入匿名的成员来“继承”的基类方法，this 就是实现该方法的类型的对象，Go 语言中方法是编译时静态绑定的。如果需要虚函数的多态特性，我们需要借助 Go 语言接口来实现。**
 ## 接口 ##
-Go 语言中的面向对象，如果一个对象只要看起来像是某种接口类型的实现，那么它就可以作为该接口类型使用。*Go 语言的接口类型是延迟绑定，可以实现类似虚函数的多态功能。*
+Go 语言中的面向对象，如果一个对象只要看起来像是某种接口类型的实现，那么它就可以作为该接口类型使用。*Go 语言的接口类型是延迟绑定，可以实现类似虚函数的多态功能。*  
+go语言的接口，是一种新的类型定义，它把所有的具有共性的方法定义在一起，**任何其他类型只要实现了这些方法就是实现了这个接口。**  
+**实现接口必须实现接口中的所有方法**  
+fmt.Fprintf 函数的签名为:```func Fprintf(w io.Writer, format string, args ...interface{}) (int, error)```
+其中 io.Writer 用于输出的接口，error 是内置的错误接口，它们的定义如下：
+```
+type io.Writer interface {
+	Write(p []byte) (n int, err error)
+}
+
+type error interface {
+	Error() string
+}
+```
+只要自己定制的类型实现了io.Writer中的方法，就实现了io.Writer，此时就可以作为fmt.Fprintf 函数的输出
+```
+//定义UpperWriter结构体
+type UpperWriter struct {
+	io.Writer  //结构体中匿名成员,接口类型
+}
+//UpperWriter结构体实现io.Writer接口方法
+func (p *UpperWriter) Write(data []byte) (n int, err error) {
+	return p.Writer.Write(bytes.ToUpper(data))  //匿名成员所对应的方法
+}
+//可以输出UpperWriter
+func main() {
+	fmt.Fprintln(&UpperWriter{os.Stdout}, "hello, world")
+}
+```
+有时候对象和接口之间太灵活了，导致需要人为地限制这种无意之间的适配。常见的做法是定义一个含特殊方法来区分接口。比如 runtime 包中的 Error 接口就定义了一个特有的 RuntimeError 方法，用于避免其它类型无意中适配了该接口：
+```
+type runtime.Error interface {
+	error
+
+	// RuntimeError is a no-op function but
+	// serves to distinguish types that are run time
+	// errors from ordinary errors: a type is a
+	// run time error if it has a RuntimeError method.
+	RuntimeError()
+}
+```
+再严格一点的做法是给接口定义一个私有方法。只有满足了这个私有方法的对象才可能满足这个接口，而私有方法的名字是包含包的绝对路径名的，因此只能在包内部实现这个私有方法才能满足这个接口。
+**在前面的方法一节中我们讲到，通过*在结构体中嵌入匿名类型成员*，可以继承匿名类型的方法。其实这个被嵌入的匿名成员不一定是普通类型，也可以是*接口类型*。我们可以通过嵌入匿名的 testing.TB 接口来伪造私有的 private 方法，因为接口方法是延迟绑定，编译时 private 方法是否真的存在并不重要。**
