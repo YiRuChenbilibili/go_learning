@@ -92,7 +92,8 @@ f, _ := OpenFile("foo.dat")
 // 绑定到了 f 对象
 // func Close() error
 var Close = func() error {
-	return (*File).Close(f)
+	return (*File).Close(f) 
+	//方法表达式:传入结构体进行实际调用，需要具体的变量f
 }
 
 // 绑定到了 f 对象
@@ -105,6 +106,8 @@ var Read = func(offset int64, data []byte) int {
 Read(0, data)
 Close()
 ```
+**方法表达式:传入结构体进行实际调用**  
+方法值（ method value ）其实是一个带有闭包的函数变量，其底层实现原理和带有闭包的匿名函数类似， 接收值被隐式地绑定到方法值（ method value ）的闭包环境中。后续调用不需要再显式地传递接收者。  
 也可以用方法值特性可以简化实现（直接通过打开对象，再将方法绑定到对象）：
 ```
 // 先打开文件对象，
@@ -112,7 +115,7 @@ f, _ := OpenFile("foo.dat")
 
 // 方法值: 绑定到了 f 对象
 // func Close() error
-var Close = f.Close
+var Close = f.Close //为值传递方式
 
 // 方法值: 绑定到了 f 对象
 // func Read(offset int64, data []byte) int
@@ -122,3 +125,26 @@ var Read = f.Read
 Read(0, data)
 Close()
 ```
+**方法值：直接将方法声明赋值给新变量**  
+Go语言**不支持传统面向对象中的继承特性**。Go 语言中，通过在结构体内置匿名的成员来实现继承：
+```
+import "image/color"
+
+type Point struct{ X, Y float64 }
+
+type ColoredPoint struct {
+	Point
+	Color color.RGBA
+}
+```
+通过嵌入匿名的成员，我们*不仅可以继承匿名成员的内部成员，而且可以继承匿名成员类型所对应的方法。*我们一般会将 Point 看作基类，把 ColoredPoint 看作是它的继承类或子类。不过这种方式继承的方法并不能实现 C++ 中虚函数的多态特性。*所有继承来的方法的接收者参数依然是那个匿名成员本身，而不是当前的变量。*
+```
+var cp ColoredPoint
+cp.X = 1
+fmt.Println(cp.Point.X) // "1"
+cp.Point.Y = 2
+fmt.Println(cp.Y)       // "2"
+```
+**在传统的面向对象语言（eg.C++ 或 Java）的继承中，子类的方法是在运行时动态绑定到对象的，因此基类实现的某些方法看到的 this 可能不是基类类型对应的对象，这个特性会导致基类方法运行的不确定性。而在 Go 语言通过嵌入匿名的成员来“继承”的基类方法，this 就是实现该方法的类型的对象，Go 语言中方法是编译时静态绑定的。如果需要虚函数的多态特性，我们需要借助 Go 语言接口来实现。**
+## 接口 ##
+Go 语言中的面向对象，如果一个对象只要看起来像是某种接口类型的实现，那么它就可以作为该接口类型使用。*Go 语言的接口类型是延迟绑定，可以实现类似虚函数的多态功能。*
