@@ -2,7 +2,8 @@
 gin是一个轻量级的 WEB 框架，支持 RestFull 风格 API，支持 GET，POST，PUT，PATCH，DELETE，OPTIONS 等 http 方法，支持文件上传，分组路由，Multipart/Urlencoded FORM，以及支持 JsonP，参数处理等等功能。  
 
 ## 简单路由使用 ##
-基本路由 gin 框架中采用的路由库是 httprouter  
+基本路由 gin 框架中采用的路由库是 httprouter。
+**路由参数**：api 参数通过Context的Param方法来获取。     
 ```
 package main
 
@@ -15,7 +16,7 @@ func main() {
 	// 创建带有默认中间件的路由:
 	router := gin.Default()
   //创建不带中间件的路由：
-	//r := gin.New()
+	//router := gin.New()
 	//定义路径，使用冒号:代替变量(name,age为变量)
 	router.GET("/user/:name/:age", func(context *gin.Context) {
 		//获取变量值
@@ -33,5 +34,18 @@ func main() {
 ```
 访问http://127.0.0.1:8080/user/name1/age1：
 ![image](https://user-images.githubusercontent.com/24589721/177819868-0d9a0b7a-bc2a-4b60-a50b-413057c6f52a.png)
+**URL 参数**：通过 DefaultQuery 或 Query 方法获取
+```
+// url 为 http://localhost:8080/welcome?name=ningskyer时
+// 输出 Hello ningskyer
+// url 为 http://localhost:8080/welcome时
+// 输出 Hello Guest
+router.GET("/welcome", func(c *gin.Context) {
+	name := c.DefaultQuery("name", "Guest") //可设置默认值
+	// 是 c.Request.URL.Query().Get("lastname") 的简写
+	lastname := c.Query("lastname") 
+	fmt.Println("Hello %s", name)
+})
+```
 
 
