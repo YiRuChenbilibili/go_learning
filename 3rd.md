@@ -89,6 +89,48 @@ func main() {
 ```
 ![image](https://user-images.githubusercontent.com/24589721/177903157-c1443c8a-7b46-49b5-88b8-82ca2fa1a3e7.png)
 ![image](https://user-images.githubusercontent.com/24589721/177903193-4e7b6a7a-b41c-4873-affc-778825ce1a85.png)  
-上传文件(from-data)
+**上传文件(from-data)**  
+multipart/form-data格式用于文件上传  
+gin文件上传与原生的net/http方法类似，不同在于*gin把原生的request封装到c.Request中*
+单个文件:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <form action="http://localhost:8080/upload" method="post" enctype="multipart/form-data">
+          上传文件:<input type="file" name="file" >
+          <input type="submit" value="提交">
+    </form>
+</body>
+</html>
+```
+```
+	r := gin.Default()
+	//限制表单上传大小 8MB，默认为32MB
+	r.MaxMultipartMemory = 8 << 20 
+	r.POST("/upload", func(c *gin.Context) {
+		//获取上传文件
+		file, err := c.FormFile("file")
+		if err != nil {
+			c.String(500, "上传出错！")
+		}
+		//保存到服务器指定位置
+		pre := "D:/golang/upload/"
+		c.SaveUploadedFile(file, pre+file.Filename)
+		c.String(http.StatusOK, fmt.Sprintf("%s 上传成功！", file.Filename))
+	})
+	r.Run()
+```
+
+![image](https://user-images.githubusercontent.com/24589721/177907891-a4b88fab-878a-40ed-ae4e-850dfa51db36.png)  
+![image](https://user-images.githubusercontent.com/24589721/177907920-a0d03843-a0f3-4a7c-bb6b-2f655e26b4a0.png)
+
+
 
 
