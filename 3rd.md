@@ -15,8 +15,9 @@ import (
 
 func main() {
 	// 创建带有默认中间件的路由:
+	// 默认使用了2个中间件Logger(), Recovery()
 	router := gin.Default()
-  //创建不带中间件的路由：
+        //创建不带中间件的路由：
 	//router := gin.New()
 	//定义路径，使用冒号:代替变量(name,age为变量)
 	router.GET("/user/:name/:age", func(context *gin.Context) {
