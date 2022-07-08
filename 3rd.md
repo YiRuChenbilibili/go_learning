@@ -131,6 +131,27 @@ $\color{#FF0000}{单个文件：}$
 ![image](https://user-images.githubusercontent.com/24589721/177907891-a4b88fab-878a-40ed-ae4e-850dfa51db36.png)  
 ![image](https://user-images.githubusercontent.com/24589721/177907920-a0d03843-a0f3-4a7c-bb6b-2f655e26b4a0.png)  
 $\color{#FF0000}{多个文件：}$ 
+```
+	r.POST("/upload", func(c *gin.Context) {
+		//获取复合型表单
+		form, err := c.MultipartForm()
+		if err != nil {
+			c.String(http.StatusBadRequest, fmt.Sprintf("get err %s", err.Error()))
+		}
+		//获取所有文件
+		files := form.File["files"]
+		pre := "D:/golang/upload/"
+		//遍历所有文件并保存到服务器指定位置
+		for _, file := range files {
+			if err := c.SaveUploadedFile(file, pre+file.Filename); err != nil {
+				c.String(400, fmt.Sprintf("文件上传失败！"))
+			}
+		}
+		c.String(http.StatusOK, fmt.Sprintf("%d 个文件上传成功！", len(files)))
+	})
+```
+![image](https://user-images.githubusercontent.com/24589721/177910308-31020b87-5e79-4098-99ec-c0a3530d016f.png)
+![image](https://user-images.githubusercontent.com/24589721/177910327-04c1a727-dbf5-43ea-9660-18cbc864ddb3.png)
 
 
 
