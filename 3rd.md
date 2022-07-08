@@ -2,7 +2,7 @@
 gin是一个轻量级的 WEB 框架，支持 RestFull 风格 API，支持 GET，POST，PUT，PATCH，DELETE，OPTIONS 等 http 方法，支持文件上传，分组路由，Multipart/Urlencoded FORM，以及支持 JsonP，参数处理等等功能。  
 
 ## 简单路由使用 ##
-基本路由 gin 框架中采用的路由库是 httprouter。
+基本路由 gin 框架中采用的路由库是 httprouter。  
 **gin路由**：   
 **api 参数**：通过Context的Param方法来获取。     
 ```
@@ -91,8 +91,8 @@ func main() {
 ![image](https://user-images.githubusercontent.com/24589721/177903193-4e7b6a7a-b41c-4873-affc-778825ce1a85.png)  
 **上传文件(from-data)**  
 multipart/form-data格式用于文件上传  
-gin文件上传与原生的net/http方法类似，不同在于*gin把原生的request封装到c.Request中*
-单个文件:
+gin文件上传与原生的net/http方法类似，不同在于*gin把原生的request封装到c.Request中*  
+$\color{#FF0000}{单个文件：}$ 
 ```
 <!DOCTYPE html>
 <html lang="en">
@@ -129,7 +129,8 @@ gin文件上传与原生的net/http方法类似，不同在于*gin把原生的re
 ```
 
 ![image](https://user-images.githubusercontent.com/24589721/177907891-a4b88fab-878a-40ed-ae4e-850dfa51db36.png)  
-![image](https://user-images.githubusercontent.com/24589721/177907920-a0d03843-a0f3-4a7c-bb6b-2f655e26b4a0.png)
+![image](https://user-images.githubusercontent.com/24589721/177907920-a0d03843-a0f3-4a7c-bb6b-2f655e26b4a0.png)  
+$\color{#FF0000}{多个文件：}$ 
 
 
 
