@@ -50,10 +50,10 @@ router.GET("/welcome", func(c *gin.Context) {
 	c.String(http.StatusOK, fmt.Sprintf("hello %s", name))
 })
 ```
-带参数
-![image](https://user-images.githubusercontent.com/24589721/177899945-cadc669b-d9ad-4b9e-8be9-ada35ba2cde0.png)
+带参数  
+![image](https://user-images.githubusercontent.com/24589721/177899945-cadc669b-d9ad-4b9e-8be9-ada35ba2cde0.png)  
 不带参数
-![image](https://user-images.githubusercontent.com/24589721/177900016-f791b92f-0dd1-4185-aeff-611514665cf5.png)
+![image](https://user-images.githubusercontent.com/24589721/177900016-f791b92f-0dd1-4185-aeff-611514665cf5.png)  
 
 
 
