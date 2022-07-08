@@ -94,7 +94,7 @@ func main() {
 ### 上传文件(from-data) ###  
 multipart/form-data格式用于文件上传  
 gin文件上传与原生的net/http方法类似，不同在于*gin把原生的request封装到c.Request中*
-$\color{#FF0000}{**单个文件：**}$ 
+$\color{#FF0000}{单个文件:}$ 
 ```
 <!DOCTYPE html>
 <html lang="en">
@@ -132,7 +132,7 @@ $\color{#FF0000}{**单个文件：**}$
 
 ![image](https://user-images.githubusercontent.com/24589721/177907891-a4b88fab-878a-40ed-ae4e-850dfa51db36.png)  
 ![image](https://user-images.githubusercontent.com/24589721/177907920-a0d03843-a0f3-4a7c-bb6b-2f655e26b4a0.png)  
-$\color{#FF0000}{**多个文件：**}$ 
+$\color{#FF0000}{多个文件:}$ 
 ```
 	r.POST("/upload", func(c *gin.Context) {
 		//获取复合型表单
