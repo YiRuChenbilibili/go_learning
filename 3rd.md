@@ -203,3 +203,52 @@ gin_demo
 └── routers
     └── routers.go
 ```
+其中app/blog/router.go用来定义post相关路由信息:
+```
+func Routers(e *gin.Engine) {
+    e.GET("/post", postHandler)
+    e.GET("/comment", commentHandler)
+}
+```
+app/shop/router.go用来定义shop相关路由信息：
+```
+func Routers(e *gin.Engine) {
+    e.GET("/goods", goodsHandler)
+    e.GET("/checkout", checkoutHandler)
+}
+```
+routers/routers.go中根据需要定义Include函数用来注册子app中定义的路由，Init函数用来进行路由的初始化操作：
+```
+//Option类型是一个函数类型
+type Option func(*gin.Engine)
+
+var options = []Option{}
+
+// 注册app的路由配置, Option类型切片
+func Include(opts ...Option) {
+    options = append(options, opts...)
+}
+
+// 初始化
+func Init() *gin.Engine {
+    //初始化gin.Engine结构体
+    r := gin.New()
+    for _, opt := range options {
+    	//用app/blog/router.go和app/shop/router.go中定义的Routers(e *gin.Engine)进行初始化
+        opt(r)
+    }
+    return r
+}
+```
+main.go中按如下方式先注册子app中的路由，然后再进行路由的初始化：
+```
+func main() {
+    // 加载多个APP的路由配置
+    routers.Include(shop.Routers, blog.Routers)
+    // 初始化路由
+    r := routers.Init()
+    if err := r.Run(); err != nil {
+        fmt.Println("startup service failed, err:%v\n", err)
+    }
+}
+```
