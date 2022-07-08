@@ -53,8 +53,6 @@ router.GET("/welcome", func(c *gin.Context) {
 ```
 带参数  
 ![image](https://user-images.githubusercontent.com/24589721/177899945-cadc669b-d9ad-4b9e-8be9-ada35ba2cde0.png)  
-不带参数
-![image](https://user-images.githubusercontent.com/24589721/177900016-f791b92f-0dd1-4185-aeff-611514665cf5.png)  
 **表单参数**：通过PostForm()方法获取，该方法默认解析的是x-www-form-urlencoded或from-data格式的参数
 ```
 <!DOCTYPE html>
