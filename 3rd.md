@@ -20,7 +20,8 @@ func main() {
         //创建不带中间件的路由：
 	//router := gin.New()
 	//定义路径，使用冒号:代替变量(name,age为变量)
-	router.GET("/user/:name/:age", func(context *gin.Context) {
+	//第一种使用冒号标记的变量获取到的是/后面的变量.第二种使用星号标记的变量,到最后会从/一直获取到路径末尾
+	router.GET("/user/:name/*age", func(context *gin.Context) {
 		//获取变量值
 		name := context.Param("name")
 		age := context.Param("age")
