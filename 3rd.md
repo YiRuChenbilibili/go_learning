@@ -154,7 +154,34 @@ $\color{#FF0000}{**多个文件：**}$
 ```
 ![image](https://user-images.githubusercontent.com/24589721/177910308-31020b87-5e79-4098-99ec-c0a3530d016f.png)
 ![image](https://user-images.githubusercontent.com/24589721/177910327-04c1a727-dbf5-43ea-9660-18cbc864ddb3.png)
+### routes group ###
+通过routes group管理相同的url： 
+```
+func main() {
+   r := gin.Default()
+   // 路由组1 ，处理GET请求
+   v1 := r.Group("/v1")
+   // {} 是书写规范
+   {
+      v1.GET("/login", login)
+      v1.GET("submit", submit)
+   }
+   //路由组2，处理post
+   v2 := r.Group("/v2")
+   {
+      v2.POST("/login", login)
+      v2.POST("/submit", submit)
+   }
+   r.Run(":8000")
+}
 
+func login(c *gin.Context) {
+    //add
+}
 
+func submit(c *gin.Context) {
+    //add
+}
+```
 
 
