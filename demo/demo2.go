@@ -1,3 +1,5 @@
+//获取cpu/内存信息
+
 package main
 
 import (
