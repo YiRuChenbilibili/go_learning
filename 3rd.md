@@ -22,6 +22,8 @@ func main() {
 		//获取变量值
 		name := context.Param("name")
 		age := context.Param("age")
+		//截取
+		age = strings.Trim(age, "/")
 		message := name + " is " + age
 		//返回值
 		context.String(http.StatusOK, "hello %s", message)
@@ -34,7 +36,8 @@ func main() {
 ```
 访问http://127.0.0.1:8080/user/name1/age1：
 ![image](https://user-images.githubusercontent.com/24589721/177819868-0d9a0b7a-bc2a-4b60-a50b-413057c6f52a.png)
-**URL 参数**：通过 DefaultQuery 或 Query 方法获取
+**URL 参数**：通过 DefaultQuery 或 Query 方法获取  
+DefaultQuery()若参数存在，返回默认值，Query()若不存在，返回空串。(API ? name=zs)
 ```
 // url 为 http://localhost:8080/welcome?name=ningskyer时
 // 输出 Hello ningskyer
@@ -43,9 +46,14 @@ func main() {
 router.GET("/welcome", func(c *gin.Context) {
 	name := c.DefaultQuery("name", "Guest") //可设置默认值
 	// 是 c.Request.URL.Query().Get("lastname") 的简写
-	lastname := c.Query("lastname") 
-	fmt.Println("Hello %s", name)
+	//name := c.Query("name") //无默认值
+	c.String(http.StatusOK, fmt.Sprintf("hello %s", name))
 })
 ```
+带参数
+![image](https://user-images.githubusercontent.com/24589721/177899945-cadc669b-d9ad-4b9e-8be9-ada35ba2cde0.png)
+不带参数
+![image](https://user-images.githubusercontent.com/24589721/177900016-f791b92f-0dd1-4185-aeff-611514665cf5.png)
+
 
 
