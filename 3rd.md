@@ -1,7 +1,7 @@
 # gin框架 #
 gin是一个轻量级的 WEB 框架，支持 RestFull 风格 API，支持 GET，POST，PUT，PATCH，DELETE，OPTIONS 等 http 方法，支持文件上传，分组路由，Multipart/Urlencoded FORM，以及支持 JsonP，参数处理等等功能。  
 
-## gin路由 ##：   
+## gin路由##：   
 基本路由 gin 框架中采用的路由库是 httprouter。 
 ### api 参数 ###：
 通过Context的Param方法来获取。     
