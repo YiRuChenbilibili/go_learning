@@ -123,4 +123,18 @@ db.Model(&user).Update("name", "jinzhu") // 将设置 `UpdatedAt` 为当前时�
 **DeletedAt**
 对于有 DeletedAt 字段的模型，当删除它们的实例时，它们并没有被从数据库中删除，只是将 DeletedAt 字段设置为当前时间。参考 Soft Delete
 
-## 连接数据库 ##
+## 数据库的连接与支持 ##
+要连接数据库，需要导入数据库驱动程序：```import _ "github.com/jinzhu/gorm/dialects/mysql"```    
+**MySQL**    
+注意： 为了正确的处理 time.Time ，需要包含 parseTime 作为参数。  
+```
+import (
+  "github.com/jinzhu/gorm"
+  _ "github.com/jinzhu/gorm/dialects/mysql"
+)
+
+func main() {
+  db, err := gorm.Open("mysql", "user:password@/dbname?charset=utf8&parseTime=True&loc=Local")
+  defer db.Close() //延迟执行
+}
+```
