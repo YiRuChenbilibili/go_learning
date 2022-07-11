@@ -33,5 +33,41 @@ func main() {
 	defer sqlDB.Close()
 }
 ```
-![image](https://user-images.githubusercontent.com/24589721/178227966-004c2470-f4fa-423e-8606-632825f216ea.png)
+![image](https://user-images.githubusercontent.com/24589721/178227966-004c2470-f4fa-423e-8606-632825f216ea.png)  
+**默认值**   
+可以通过标签定义字段的默认值(*会在mysql中进行默认值设置*），例如：
+```
+type Animal struct {
+    ID   int64
+    //设置默认值为galeone
+    Name string `gorm:"default:'galeone'"`
+    Age  int64
+}
+```
+然后 SQL 会排除那些没有值或者有零值的字段，在记录插入数据库之后，gorm将从数据库中加载这些字段的值。 
+```
+var animal = Animal{Age: 99, Name: ""}
+db.Create(&animal)
+// INSERT INTO animals("age") values('99');
+// SELECT name from animals WHERE ID=111; // 返回的主键是 111
+// animal.Name => 'galeone' //名字为默认值的名字
+```
+**注意:所有包含零值的字段，像 0，''，false 或者其他的 零值 不会被保存到数据库中，但会使用这个字段的默认值(即会导致无法赋零值，只赋默认值)。应该考虑使用指针类型或者其他的值来避免这种情况:**
+```
+// Use pointer value
+type User struct {
+  gorm.Model
+  Name string
+  Age  *int `gorm:"default:18"`
+}
 
+// Use scanner/valuer
+type User struct {
+  gorm.Model
+  Name string
+  Age  sql.NullInt64 `gorm:"default:18"`
+}
+```
+**在Hook中设置字段值**  
+
+## 删除记录 ##
