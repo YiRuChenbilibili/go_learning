@@ -69,5 +69,18 @@ type User struct {
 }
 ```
 **在Hook中设置字段值**  
-
+如果想在 BeforeCreate 函数中更新字段的值，应该使用 scope.SetColumn，例如：
+```
+func (user *User) BeforeCreate(scope *gorm.Scope) error {
+  scope.SetColumn("ID", uuid.New())
+  return nil
+}
+```
+**创建额外选项**
+```
+// 为插入 SQL 语句添加额外选项
+db.Set("gorm:insert_option", "ON CONFLICT").Create(&product)
+//on conflict 唯一键
+// INSERT INTO products (name, code) VALUES ("name", "code") ON CONFLICT;
+```
 ## 删除记录 ##
