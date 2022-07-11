@@ -63,10 +63,15 @@ func (u User) TableName() string {
         return "users"
     }
 }
+//给默认表名加前缀或者后缀
+gorm.DefaultTableNameHanlder = func(db *gorm.DB,defaultTableName string){
+    return "sys_" + defaultTableName
+}
 
 // 如果设置禁用表名复数形式属性为 true，`User` 的表名将是 `user`而非`users`
 db.SingularTable(true)
 ```
+默认情况下都给模型定义表名，有时候定义模型只是单纯的用于接收手写sql查询的结果，这个时候是不需要定义表名；*手动通过gorm函数Table()指定表名，也不需要给模型定义TableName函数。*  
 **指定表名**   
 ```
 // 用 `User` 结构体创建 `delete_users` 表
