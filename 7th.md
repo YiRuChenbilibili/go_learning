@@ -63,6 +63,10 @@ func (u User) TableName() string {
         return "users"
     }
 }
+//wdb := db.RW.Table(model.TableName()) // 指定table，然后执行后续操作
+//wdb.Find() // 查询
+//wdb.Create() // insert
+
 //给默认表名加前缀或者后缀
 gorm.DefaultTableNameHanlder = func(db *gorm.DB,defaultTableName string){
     return "sys_" + defaultTableName
@@ -118,3 +122,5 @@ db.Model(&user).Update("name", "jinzhu") // 将设置 `UpdatedAt` 为当前时�
 ```
 **DeletedAt**
 对于有 DeletedAt 字段的模型，当删除它们的实例时，它们并没有被从数据库中删除，只是将 DeletedAt 字段设置为当前时间。参考 Soft Delete
+
+## 连接数据库 ##
