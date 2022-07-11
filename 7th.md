@@ -129,12 +129,16 @@ db.Model(&user).Update("name", "jinzhu") // 将设置 `UpdatedAt` 为当前时�
 注意： 为了正确的处理 time.Time ，需要包含 parseTime 作为参数。  
 ```
 import (
-  "github.com/jinzhu/gorm"
-  _ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func main() {
-  db, err := gorm.Open("mysql", "user:password@/dbname?charset=utf8&parseTime=True&loc=Local")
-  defer db.Close() //延迟执行
+//gorm.io v2版本中连接数据库方法
+//dsn := "用户名:密码@tcp(主机:端口)/数据库名字?charset=字符类型&parseTime=True&loc=Local"
+	dsn := "gorm:gorm@tcp(localhost:3304)/gorm?charset=utf8&parseTime=True&loc=Local"
+	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	sqlDB, _ := db.DB()
+	defer sqlDB.Close()
 }
 ```
