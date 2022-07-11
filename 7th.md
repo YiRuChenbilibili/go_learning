@@ -64,7 +64,7 @@ func (u User) TableName() string {
     }
 }
 
-// 如果设置禁用表名复数形式属性为 true，`User` 的表名将是 `user`
+// 如果设置禁用表名复数形式属性为 true，`User` 的表名将是 `user`而非`users`
 db.SingularTable(true)
 ```
 **指定表名**   
