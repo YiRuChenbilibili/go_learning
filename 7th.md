@@ -135,8 +135,8 @@ import (
 
 func main() {
 //gorm.io v2版本中连接数据库方法
-//dsn := "用户名:密码@tcp(主机:端口)/数据库名字?charset=字符类型&parseTime=True&loc=Local"
-	dsn := "gorm:gorm@tcp(localhost:3304)/gorm?charset=utf8&parseTime=True&loc=Local"
+//dsn := "用户名:密码@tcp(主机:端口)/数据库名字?charset=字符类型&parseTime=True&loc=Local"(数据库名字前一定要加/)
+	dsn := "root:chen0309@tcp(localhost:3306)/gorm?charset=utf8&parseTime=True&loc=Local"
 	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
