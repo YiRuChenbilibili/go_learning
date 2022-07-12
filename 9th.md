@@ -156,3 +156,39 @@ type CreditCard struct {
   Number   string
   UserName string //外键
 }
+```
+**多态关联**   
+GORM 为 has one 和 has many 提供了多态关联支持，它会将拥有者实体的表名、主键值都保存到多态类型的字段中。
+```
+type Cat struct {
+  ID    int
+  Name  string
+  Toy   Toy `gorm:"polymorphic:Owner;"`
+}
+
+type Dog struct {
+  ID   int
+  Name string
+  Toy  Toy `gorm:"polymorphic:Owner;"`
+}
+
+type Toy struct {
+  ID        int
+  Name      string
+  OwnerID   int
+  OwnerType string
+}
+
+db.Create(&Dog{Name: "dog1", Toy: Toy{Name: "toy1"}})
+// INSERT INTO `dogs` (`name`) VALUES ("dog1")
+// INSERT INTO `toys` (`name`,`owner_id`,`owner_type`) VALUES ("toy1","1","dogs")
+```
+**related**
+```
+var card CreditCard
+db.Model(&user).Related(&card, "CreditCard")
+//// SELECT * FROM credit_cards WHERE user_id = 123; // 123 是用户表的主键
+// CreditCard  是用户表的字段名，这意味着获取用户的信用卡关系并写入变量 card。
+// 像上面的例子，如果字段名和变量类型名一样，它就可以省略， 像：
+db.Model(&user).Related(&card)
+```
