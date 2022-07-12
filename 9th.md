@@ -192,6 +192,20 @@ db.Model(&user).Related(&card, "CreditCard")
 // 像上面的例子，如果字段名和变量类型名一样，它就可以省略， 像：
 db.Model(&user).Related(&card)
 ```
+**外键约束**   
+可以通过为标签 constraint 配置 OnUpdate、OnDelete 实现外键约束，在使用 GORM 进行迁移时它会被创建，例如：
+```
+type User struct {
+  gorm.Model
+  CreditCard CreditCard `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+}
+
+type CreditCard struct {
+  gorm.Model
+  Number string
+  UserID uint
+}
+```
 ## Has Many ##
 has many 与另一个模型建立了一对多的连接。 不同于 has one，拥有者可以有零或多个关联模型。例如，应用包含 user 和 credit card 模型，且每个 user 可以有多张 credit card。
 ```
