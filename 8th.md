@@ -83,4 +83,72 @@ db.Set("gorm:insert_option", "ON CONFLICT").Create(&product)
 //on conflict 唯一键
 // INSERT INTO products (name, code) VALUES ("name", "code") ON CONFLICT;
 ```
-## 删除记录 ##
+## 查询记录 ##
+gorm查询数据本质上就是提供一组函数，帮我们快速拼接sql语句，尽量减少编写sql语句的工作量。  
+gorm查询结果我们一般都是**保存到结构体(struct)变量**，所以在执行查询操作之前需要根据自己想要查询的数据定义结构体类型。
+```
+//定义接收查询结果的结构体变量
+user := User{}
+// 获取第一条记录，按主键排序
+db.First(&user)
+//// SELECT * FROM users ORDER BY id LIMIT 1;
+
+// 获取一条记录，不指定排序
+db.Take(&user)
+//// SELECT * FROM users LIMIT 1;
+
+// 获取最后一条记录，按主键排序
+db.Last(&user)
+//// SELECT * FROM users ORDER BY id DESC LIMIT 1;
+
+// 获取所有的记录
+db.Find(&users)
+//// SELECT * FROM users;
+
+// 通过主键进行查询 (仅适用于主键是数字类型)
+db.First(&user, 10)
+//// SELECT * FROM users WHERE id = 10;
+
+fmt.Println(user)
+```
+**查询语句**
+where：
+```
+// 获取第一条匹配的记录
+db.Where("name = ?", "jinzhu").First(&user)
+//// SELECT * FROM users WHERE name = 'jinzhu' limit 1;
+```
+Not:
+```
+// 不包含
+db.Not("name", []string{"jinzhu", "jinzhu 2"}).Find(&users)
+//// SELECT * FROM users WHERE name NOT IN ("jinzhu", "jinzhu 2");
+```
+Or:
+```
+// Struct
+db.Where("name = 'jinzhu'").Or(User{Name: "jinzhu 2"}).Find(&users)
+//// SELECT * FROM users WHERE name = 'jinzhu' OR name = 'jinzhu 2';
+```
+gorm可以使用struct或map实现查询   
+**当通过struct进行查询的时候，GORM 将会查询这些字段的非零值， 意味着你的字段包含 0， ''， false 或者其他 零值, 将不会出现在查询语句中， 例如:**
+```
+db.Where(&User{Name: "jinzhu", Age: 0}).Find(&users)
+//// SELECT * FROM users WHERE name = "jinzhu";
+```
+可以考虑适用指针类型或者 scanner/valuer 来避免这种情况:
+```
+// 使用指针类型
+type User struct {
+  gorm.Model
+  Name string
+  Age  *int
+}
+
+// 使用 scanner/valuer
+type User struct {
+  gorm.Model
+  Name string
+  Age  sql.NullInt64
+}
+```
