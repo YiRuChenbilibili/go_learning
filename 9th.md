@@ -192,3 +192,64 @@ db.Model(&user).Related(&card, "CreditCard")
 // 像上面的例子，如果字段名和变量类型名一样，它就可以省略， 像：
 db.Model(&user).Related(&card)
 ```
+## Has Many ##
+has many 与另一个模型建立了一对多的连接。 不同于 has one，拥有者可以有零或多个关联模型。例如，应用包含 user 和 credit card 模型，且每个 user 可以有多张 credit card。
+```
+// User 有多张 CreditCard，UserID 是外键
+type User struct {
+  gorm.Model
+  CreditCards []CreditCard
+}
+
+type CreditCard struct {
+  gorm.Model
+  Number string
+  UserID uint
+}
+```
+**重写外键**   
+```
+type User struct {
+  gorm.Model
+  CreditCards []CreditCard `gorm:"foreignKey:UserRefer"`
+}
+
+type CreditCard struct {
+  gorm.Model
+  Number    string
+  UserRefer uint
+}
+```
+**重写引用**   
+```
+type User struct {
+  gorm.Model
+  MemberNumber string
+  CreditCards  []CreditCard `gorm:"foreignKey:UserNumber;references:MemberNumber"`
+}
+
+type CreditCard struct {
+  gorm.Model
+  Number     string
+  UserNumber string
+}
+```
+**多态关联**  GORM 为 has one 和 has many 提供了多态关联支持，它会将拥有者实体的表名、主键都保存到多态类型的字段中。可以使用标签 polymorphicValue 来更改多态类型的值
+```
+type Dog struct {
+  ID   int
+  Name string
+  Toys []Toy `gorm:"polymorphic:Owner;polymorphicValue:master"`
+}
+
+type Toy struct {
+  ID        int
+  Name      string
+  OwnerID   int
+  OwnerType string
+}
+
+db.Create(&Dog{Name: "dog1", Toy: []Toy{{Name: "toy1"}, {Name: "toy2"}}})
+// INSERT INTO `dogs` (`name`) VALUES ("dog1")
+// INSERT INTO `toys` (`name`,`owner_id`,`owner_type`) VALUES ("toy1","1","master"), ("toy2","1","master")
+```
