@@ -56,4 +56,42 @@ type Company struct {
 db.Model(&Company).Related(&User)
 //// SELECT * FROM User WHERE Company = 111; // 111 is Company's ID
 ```
+```
+package main
+
+import (
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
+
+// `User` 属于 `Company`，`CompanyID` 是外键
+type User struct {
+	gorm.Model
+	Name string
+	//CompanyID是默认外键
+	CompanyID int
+	Company   Company
+}
+
+type Company struct {
+	//也可以直接使用gorm.Model，包含ID
+	gorm.Model
+	Name string
+}
+
+func main() {
+	dsn := "root:chen0309@tcp(localhost:3306)/gorm?charset=utf8&parseTime=True&loc=Local"
+	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	//db.AutoMigrate(&User{})
+	//db.AutoMigrate(&Company{})
+	company := Company{Name: "mhy"}
+	db.Create(&company)
+  // Company: company实体
+	user := User{Name: "chenyiru", Company: company}
+	db.Create(&user)
+	sqlDB, _ := db.DB()
+	defer sqlDB.Close()
+}
+```
+![image](https://user-images.githubusercontent.com/24589721/178443062-ab183f75-6301-49a4-82c0-640ba73b1967.png)
 
