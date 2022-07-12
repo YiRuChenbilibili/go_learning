@@ -112,6 +112,8 @@ db.First(&user, 10)
 
 fmt.Println(user)
 ```
+![image](https://user-images.githubusercontent.com/24589721/178425847-c10a59db-70e6-416f-8ce2-6f10f7900608.png)
+
 **查询语句**   
 where：
 ```
