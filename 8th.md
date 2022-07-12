@@ -89,6 +89,7 @@ gorm查询结果我们一般都是**保存到结构体(struct)变量**，所以�
 ```
 //定义接收查询结果的结构体变量
 user := User{}
+//user := []User{} 当获取结果为数组时的定义(结构体数组)
 // 获取第一条记录，按主键排序
 db.First(&user)
 //// SELECT * FROM users ORDER BY id LIMIT 1;
@@ -101,7 +102,7 @@ db.Take(&user)
 db.Last(&user)
 //// SELECT * FROM users ORDER BY id DESC LIMIT 1;
 
-// 获取所有的记录
+// 获取所有的记录，Find函数返回的是一个数组，所以定义一个数组用来接收结果user := []User{}
 db.Find(&users)
 //// SELECT * FROM users;
 
@@ -167,4 +168,20 @@ db.First(&user, "id = ?", "string_primary_key")
 // 为查询 SQL 添加额外的选项
 db.Set("gorm:query_option", "FOR UPDATE").First(&user, 10)
 //// SELECT * FROM users WHERE id = 10 FOR UPDATE;
+```
+**Row()和Scan()
+```
+rows, err := db.Table("orders").Select("date(created_at) as date, sum(amount) as total").Group("date(created_at)").Rows()
+//数据库连接需要关闭
+defer rows.Close()
+for rows.Next() {
+    err = rows.Scan(user)
+} 
+
+type Result struct {
+    Date  time.Time
+    Total int64
+}
+//使用Scan()将信息快速绑定到结构体
+db.Table("orders").Select("date(created_at) as date, sum(amount) as total").Group("date(created_at)").Having("sum(amount) > ?", 100).Scan(&results)
 ```
