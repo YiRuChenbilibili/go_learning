@@ -111,7 +111,7 @@ db.First(&user, 10)
 
 fmt.Println(user)
 ```
-**查询语句**
+**查询语句**   
 where：
 ```
 // 获取第一条匹配的记录
@@ -151,4 +151,20 @@ type User struct {
   Name string
   Age  sql.NullInt64
 }
+```
+**行内条件查询**   
+需要注意的是，当使用链式调用传入行内条件查询时，这些查询不会被传参给后续的中间方法。  
+```
+// 通过主键进行查询 (仅适用于主键是数字类型)
+db.First(&user, 23)
+//// SELECT * FROM users WHERE id = 23 LIMIT 1;
+// 非数字类型的主键查询
+db.First(&user, "id = ?", "string_primary_key")
+//// SELECT * FROM users WHERE id = 'string_primary_key' LIMIT 1;
+```
+**额外的查询选项**
+```
+// 为查询 SQL 添加额外的选项
+db.Set("gorm:query_option", "FOR UPDATE").First(&user, 10)
+//// SELECT * FROM users WHERE id = 10 FOR UPDATE;
 ```
