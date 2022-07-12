@@ -158,7 +158,10 @@ type CreditCard struct {
 }
 ```
 **多态关联**   
-GORM 为 has one 和 has many 提供了多态关联支持，它会将拥有者实体的表名、主键值都保存到多态类型的字段中。
+GORM 为 has one 和 has many 提供了多态关联支持，它会将拥有者实体的表名、主键值都保存到多态类型的字段中。  
+polymorphic 指定多态类型，比如模型名   
+polymorphicValue 指定多态值、默认表名    
+cat和dog都有toy，用polymorphic:Owner指定多态，则只需要2个字段即可实现多态（OwnerType，OwnerID）
 ```
 type Cat struct {
   ID    int
@@ -248,7 +251,8 @@ type CreditCard struct {
   UserNumber string
 }
 ```
-**多态关联**  GORM 为 has one 和 has many 提供了多态关联支持，它会将拥有者实体的表名、主键都保存到多态类型的字段中。可以使用标签 polymorphicValue 来更改多态类型的值
+**多态关联**  
+GORM 为 has one 和 has many 提供了多态关联支持，它会将拥有者实体的表名、主键都保存到多态类型的字段中。可以使用标签 polymorphicValue 来更改多态类型的值
 ```
 type Dog struct {
   ID   int
@@ -266,4 +270,60 @@ type Toy struct {
 db.Create(&Dog{Name: "dog1", Toy: []Toy{{Name: "toy1"}, {Name: "toy2"}}})
 // INSERT INTO `dogs` (`name`) VALUES ("dog1")
 // INSERT INTO `toys` (`name`,`owner_id`,`owner_type`) VALUES ("toy1","1","master"), ("toy2","1","master")
+```
+## Many To Many ##   
+Many to Many 会在两个 model 中添加一张连接表。例如，应用包含了 user 和 language，且一个 user 可以说多种 language，多个 user 也可以说一种 language。
+```
+// User 拥有并属于多种 language，`user_languages` 是连接表
+type User struct {
+  gorm.Model
+  Languages []Language `gorm:"many2many:user_languages;"`
+}
+
+type Language struct {
+  gorm.Model
+  Name string
+}
+```
+*当使用 GORM 的 AutoMigrate 为 User 创建表时，GORM 会自动创建连接表*
+**反向引用**
+```
+// User 拥有并属于多种 language，`user_languages` 是连接表
+type User struct {
+  gorm.Model
+  Languages []*Language `gorm:"many2many:user_languages;"`
+}
+
+type Language struct {
+  gorm.Model
+  Name string
+  Users []*User `gorm:"many2many:user_languages;"`
+}
+```
+**重写外键**   
+对于 many2many 关系，连接表会同时拥有两个模型的外键.若要重写它们，可以使用标签 foreignKey、references、joinforeignKey、joinReferences。
+```
+type User struct {
+    gorm.Model
+    Profiles []Profile `gorm:"many2many:user_profiles;foreignKey:Refer;joinForeignKey:UserReferID;References:UserRefer;joinReferences:ProfileRefer"`
+    Refer    uint      `gorm:"index:,unique"`
+}
+
+type Profile struct {
+    gorm.Model
+    Name      string
+    UserRefer uint `gorm:"index:,unique"`
+}
+
+// Which creates join table: user_profiles
+//   foreign key: user_refer_id, reference: users.refer
+//   foreign key: profile_refer, reference: profiles.user_refer
+```
+**使用多对多**  
+```
+db.Model(&user).Related(&languages, "Languages")
+//// SELECT * FROM "languages" INNER JOIN "user_languages" ON "user_languages"."language_id" = "languages"."id" WHERE "user_languages"."user_id" = 111
+
+//  当查询用户时预加载 Language
+db.Preload("Languages").First(&user)
 ```
