@@ -44,6 +44,7 @@ func UserLoginMiddleWare() gin.HandlerFunc {
 	}
 }
 
+//登录后可创建评论
 func (repo *Repo) CreateViews(c *gin.Context) {
 	var view data.View
 	c.Bind(&view)
@@ -58,6 +59,7 @@ func (repo *Repo) CreateViews(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": view.View})
 }
 
+//查看登录用户的所有评论
 func (repo *Repo) GetViewsbyUserId(c *gin.Context) {
 	var views []data.View
 	userid, _ := c.Get("Userid")
