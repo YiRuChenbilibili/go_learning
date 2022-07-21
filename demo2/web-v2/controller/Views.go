@@ -19,6 +19,7 @@ func (repo *Repo) UserLogin(c *gin.Context) {
 		return
 	} else {
 		//验证成功，设置cookie
+		//cookie值为用户ID
 		//cookie名,cookie值,cookie有效时长, cookie 所在的目录,所在域,是否只能通过 https 访问,是否可以通过 js代码进行操作
 		c.SetCookie("abc", Id, 3600, "/", "localhost", false, true)
 		c.String(http.StatusOK, "Login success!")
@@ -26,12 +27,13 @@ func (repo *Repo) UserLogin(c *gin.Context) {
 
 }
 
-//构建中间件用于用户登录
+//构建中间件用于后续步骤获取用户登录信息
 func UserLoginMiddleWare() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//如果正确登录
 		cookie, err := c.Cookie("abc")
 		if err == nil {
+			//将cookie值设为Userid，后续可用Get获取值
 			c.Set("Userid", cookie)
 			//继续后续函数
 			c.Next()
@@ -63,6 +65,7 @@ func (repo *Repo) CreateViews(c *gin.Context) {
 //查看登录用户的所有评论
 func (repo *Repo) GetViewsbyUserId(c *gin.Context) {
 	var views []data.View
+	//中间件取值
 	userid, _ := c.Get("Userid")
 	id := userid.(string)
 	if err := data.GetViewsbyUserId(repo.db, &views, id); err != nil {
