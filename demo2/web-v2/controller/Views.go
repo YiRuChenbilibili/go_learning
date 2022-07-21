@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//通过cookie实现用户登录
 func (repo *Repo) UserLogin(c *gin.Context) {
 	Id := c.PostForm("userid")
 	Password := c.PostForm("password")
