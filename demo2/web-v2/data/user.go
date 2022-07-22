@@ -10,7 +10,7 @@ type User struct {
 	Name     string `form:"name" binding:"required"`
 	Email    string `form:"email"`
 	Phonenum string `form:"phonenum"`
-	Password string `gorm:"default:'123456'" form:"passward"`
+	Password string `gorm:"default:'123456'" form:"password"`
 }
 
 func CreateUser(db *gorm.DB, user *User) (err error) {
