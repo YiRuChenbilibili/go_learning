@@ -295,3 +295,29 @@ func (b *BrokerImpl) unsubscribe(topic string, sub <-chan interface{}) error {
 	return nil
 }
 ```
+**close**
+```
+func (b *BrokerImpl) close()  {
+	select {
+	//b.exit不为空且返回零值时，表示chan已经关闭了，防止关闭已经关闭的chan
+	case <-b.exit:
+		return
+	default:
+		//关闭b.exit
+		close(b.exit)
+		b.Lock()
+		b.topics = make(map[string][]chan interface{})
+		b.Unlock()
+	}
+	return
+}
+``` 
+这句代码b.topics = make(map[string][]chan interface{})比较重要，这里主要是为了保证下一次使用该消息队列不发生冲突。
+```
+close函数是一个内建函数， 用来关闭channel，这个channel要么是双向的， 要么是只写的（chan<- Type）。       
+这个方法应该只由发送者调用， 而不是接收者。 
+当最后一个发送的值都被接收者从关闭的channel(下简称为c)中接收时, 
+接下来所有接收的值都会非阻塞直接成功，返回channel元素的零值。 
+如下的代码： 
+如果c已经关闭（c中所有值都被接收）， x, ok := <- c， 读取ok将会得到false。
+```
