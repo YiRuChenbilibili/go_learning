@@ -51,3 +51,125 @@ func main() {
 }
 ```
 ## 带缓冲的通道的使用 ##
+Go语言中有缓冲的通道（buffered channel）是一种在被接收前能存储一个或者多个值的通道。这种类型的通道并不强制要求 goroutine 之间必须同时完成发送和接收。通道会阻塞发送和接收动作的条件也会不同。只有在通道中没有要接收的值时，接收动作才会阻塞。只有在通道没有可用缓冲区容纳被发送的值时，发送动作才会阻塞。
+
+有缓冲通道的定义方式如下：
+```
+通道实例 := make(chan 通道类型, 缓冲大小)
+```
+通道类型：和无缓冲通道用法一致，影响通道发送和接收的数据类型。
+缓冲大小：决定通道最多可以保存的元素数量。
+通道实例：被创建出的通道实例。
+例子:
+```
+package main
+
+import (
+    "sync"
+    "time"
+)
+
+func main() {
+    c := make(chan string, 2)
+
+    var wg sync.WaitGroup
+    wg.Add(2)
+
+    go func() {
+        defer wg.Done()
+
+        c <- `Golang梦工厂`
+        c <- `asong`
+    }()
+
+    go func() {
+        defer wg.Done()
+
+        time.Sleep(time.Second * 1)
+        println(`公众号: `+ <-c)
+        println(`作者: `+ <-c)
+    }()
+
+    wg.Wait()
+}
+```
+## 消息队列编码实现 ##
+**准备**      
+定义接口，列出需要实现的方法：
+```
+type Broker interface {
+	publish(topic string, msg interface{}) error
+	subscribe(topic string) (<-chan interface{}, error) //返回对应的通道
+	unsubscribe(topic string, sub <-chan interface{}) error
+	close()
+	broadcast(msg interface{}, subscribers []chan interface{})
+	setConditions(capacity int)
+}
+```
+publish：进行消息的推送，有两个参数即topic、msg，分别是订阅的主题、要传递的消息      
+subscribe：消息的订阅，传入订阅的主题，即可完成订阅，并返回对应的channel通道用来接收数据       
+unsubscribe：取消订阅，传入订阅的主题和对应的通道       
+close：这个的作用就是很明显了，就是用来关闭消息队列的      
+broadCast：这个属于内部方法，作用是进行广播，对推送的消息进行广播，保证每一个订阅者都可以收到      
+setConditions：这里是用来设置条件，条件就是消息队列的容量，这样我们就可以控制消息队列的大小了        
+
+封装成客户端可以直接调用的方法：
+```
+package mq
+
+
+type Client struct {
+	bro *BrokerImpl
+}
+
+func NewClient() *Client {
+	return &Client{
+		bro: NewBroker(),
+	}
+}
+
+func (c *Client)SetConditions(capacity int)  {
+	c.bro.setConditions(capacity)
+}
+
+func (c *Client)Publish(topic string, msg interface{}) error{
+	return c.bro.publish(topic,msg)
+}
+
+func (c *Client)Subscribe(topic string) (<-chan interface{}, error){
+	return c.bro.subscribe(topic)
+}
+
+func (c *Client)Unsubscribe(topic string, sub <-chan interface{}) error {
+	return c.bro.unsubscribe(topic,sub)
+}
+
+func (c *Client)Close()  {
+	 c.bro.close()
+}
+
+func (c *Client)GetPayLoad(sub <-chan interface{})  interface{}{
+	for val:= range sub{
+		if val != nil{
+			return val
+		}
+	}
+	return nil
+}
+```
+
+**消息队列的结构**
+```
+type BrokerImpl struct {
+	exit chan bool
+	capacity int
+
+	topics map[string][]chan interface{} // key： topic  value ： queue
+	sync.RWMutex // 同步锁
+}
+```
+exit：也是一个通道，这个用来做关闭消息队列用的     
+capacity：即用来设置消息队列的容量      
+topics：这里使用一个map结构，key即是topic，其值则是一个切片，chan类型，这里这么做的原因是我们一个topic可以有多个订阅者，所以一个订阅者对应着一个通道      
+sync.RWMutex：读写锁，这里是为了防止并发情况下，数据的推送出现错误，所以采用加锁的方式进行保证      
+
