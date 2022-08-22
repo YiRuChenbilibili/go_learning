@@ -252,11 +252,11 @@ func (b *BrokerImpl) subscribe(topic string) (<-chan interface{}, error) {
 	default:
 	}
 
-	ch := make(chan interface{}, b.capacity) //按订阅数量设置容量
+	ch := make(chan interface{}, b.capacity) //订阅的主题创建一个channel，按订阅数量设置容量
 	b.Lock()
-	b.topics[topic] = append(b.topics[topic], ch) //传入订阅的主题
+	b.topics[topic] = append(b.topics[topic], ch) //将订阅者加入到对应的topic
 	b.Unlock()
-	return ch, nil
+	return ch, nil //将订阅者加入到对应的topic 
 }
 func (b *BrokerImpl) unsubscribe(topic string, sub <-chan interface{}) error {
 	select {
