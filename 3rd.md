@@ -321,3 +321,20 @@ close函数是一个内建函数， 用来关闭channel，这个channel要么是
 如下的代码： 
 如果c已经关闭（c中所有值都被接收）， x, ok := <- c， 读取ok将会得到false。
 ```
+
+**setConditions GetPayLoad**      
+```
+//获取消息队列容量
+func (b *BrokerImpl)setConditions(capacity int)  {
+	b.capacity = capacity
+}
+//封装一个方法来获取订阅的消息
+func (c *Client)GetPayLoad(sub <-chan interface{})  interface{}{
+	for val:= range sub{
+		if val != nil{
+			return val
+		}
+	}
+	return nil
+}
+```
