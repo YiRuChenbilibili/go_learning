@@ -244,3 +244,46 @@ case <- timeout:
 ```
 
 **subscribe 和 unsubScribe**
+```
+func (b *BrokerImpl) subscribe(topic string) (<-chan interface{}, error) {
+	select {
+	case <-b.exit:
+		return nil, errors.New("broker closed")
+	default:
+	}
+
+	ch := make(chan interface{}, b.capacity) //按订阅数量设置容量
+	b.Lock()
+	b.topics[topic] = append(b.topics[topic], ch) //传入订阅的主题
+	b.Unlock()
+	return ch, nil
+}
+func (b *BrokerImpl) unsubscribe(topic string, sub <-chan interface{}) error {
+	select {
+	case <-b.exit:
+		return errors.New("broker closed")
+	default:
+	}
+
+	b.RLock()
+	subscribers, ok := b.topics[topic]
+	b.RUnlock()
+
+	if !ok {
+		return nil
+	}
+	// delete subscriber
+	var newSubs []chan interface{}
+	for _, subscriber := range subscribers {
+		if subscriber == sub {
+			continue
+		}
+		newSubs = append(newSubs, subscriber)
+	}
+
+	b.Lock()
+	b.topics[topic] = newSubs
+	b.Unlock()
+	return nil
+}
+```
