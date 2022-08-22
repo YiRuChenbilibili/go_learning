@@ -5,7 +5,12 @@ Goroutine 和 Channel 是 Go 语言并发编程的两大基石。Goroutine 用�
 先向 Channel 发送数据的 Goroutine 会得到先发送数据的权利；
 
 **创建Channel**     
-```通道实例 := make(chan 数据类型)```  
+```
+通道实例 := make(chan 数据类型)
+
+ch1 := make(chan int)                 // 创建一个整型类型的通道
+ch2 := make(chan interface{})         // 创建一个空接口类型的通道, 可以存放任意格式
+```  
 
 数据类型：通道内传输的元素类型。
 通道实例：通过make创建的通道句柄。
@@ -272,16 +277,19 @@ func (b *BrokerImpl) unsubscribe(topic string, sub <-chan interface{}) error {
 	if !ok {
 		return nil
 	}
-	// delete subscriber
+	// delete subscriber删除
 	var newSubs []chan interface{}
 	for _, subscriber := range subscribers {
+		//如果与要删除的chan相同，则丢弃
 		if subscriber == sub {
 			continue
 		}
+		//否则重新加入切片
 		newSubs = append(newSubs, subscriber)
 	}
 
 	b.Lock()
+	//更新topic
 	b.topics[topic] = newSubs
 	b.Unlock()
 	return nil
