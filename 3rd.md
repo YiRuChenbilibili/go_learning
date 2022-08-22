@@ -338,3 +338,5 @@ func (c *Client)GetPayLoad(sub <-chan interface{})  interface{}{
 	return nil
 }
 ```
+**测试**
+https://blog.csdn.net/qq_39397165/article/details/108686391
