@@ -173,3 +173,74 @@ capacity：即用来设置消息队列的容量
 topics：这里使用一个map结构，key即是topic，其值则是一个切片，chan类型，这里这么做的原因是我们一个topic可以有多个订阅者，所以一个订阅者对应着一个通道      
 sync.RWMutex：读写锁，这里是为了防止并发情况下，数据的推送出现错误，所以采用加锁的方式进行保证      
 
+**Publish和broadcast**      
+传入数据并进行广播：
+```
+func (b *BrokerImpl) publish(topic string, pub interface{}) error {
+	select {
+	case <-b.exit:
+		return errors.New("broker closed")
+	default:
+	}
+
+	b.RLock()
+	subscribers, ok := b.topics[topic]
+	b.RUnlock()
+	if !ok {
+		return nil
+	}
+
+	b.broadcast(pub, subscribers)
+	return nil
+}
+
+
+func (b *BrokerImpl) broadcast(msg interface{}, subscribers []chan interface{}) {
+	count := len(subscribers)
+	concurrency := 1
+
+	//当数量过多时，用for循环推送消息
+	switch {
+	case count > 1000:
+		concurrency = 3
+	case count > 100:
+		concurrency = 2
+	default:
+		concurrency = 1
+	}
+	pub := func(start int) {
+		for j := start; j < count; j += concurrency {
+			select {
+			//正常推送数据
+			case subscribers[j] <- msg: 
+			//超时机制，超过5毫秒就停止推送
+			case <-time.After(time.Millisecond * 5):
+			//结束
+			case <-b.exit:
+				return
+			}
+		}
+	}
+	for i := 0; i < concurrency; i++ {
+		go pub(i)
+	}
+}
+```
+其中使用了select语句： **select 的代码形式和 switch 非常相似， 不过 select 的 case 里的操作语句只能是【IO 操作】 。**       
+使用 select 实现 timeout 机制：
+```
+timeout := make (chan bool, 1)
+go func() {
+    time.Sleep(1e9) // sleep one second
+    timeout <- true
+}()
+ch := make (chan int)
+select {
+case <- ch:
+    fmt.Println("get ch")
+case <- timeout:
+    fmt.Println("timeout!")
+}
+```
+
+**subscribe 和 unsubScribe**
